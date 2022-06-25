@@ -21,12 +21,12 @@ class AutoBanMod(loader.Module):
         reply = await message.get_reply_message()
 
         if not (args or reply):
-            return await message.edit("Нет аргументов или реплая")
-
+            message = await utils.answer(message, "Нет аргументов или реплая")
+            return
         if args == "list":
             if not users:
-                return await message.edit("Список пуст")
-
+                message = await urils.answer(message, "Список пуст")
+                return
             msg = ""
             for _ in users:
                 try:
@@ -35,24 +35,24 @@ class AutoBanMod(loader.Module):
                 except:
                     users.remove(_)
                     self.db.set("AutoBan", "users", users)
-                    return await message.edit("Произошла ошибка. Повтори команду")
-
-            return await message.edit(f"Список пользователей в автобане:\n\n{msg}")
-
+                    message = await utils.answer(message, "Произошла ошибка. Повтори команду")
+                    return
+            message = await utils.answer(message, f"Список пользователей в автобане:\n\n{msg}")
+            return
         try:
             user = await self.client.get_entity(reply.sender_id if reply else args if not args.isnumeric() else int(args))
         except ValueError:
-            return await message.edit("Не удалось найти пользователя")
-
+            message = await utils.answer(message, "Не удалось найти пользователя")
+            return
         if user.id not in users:
             users.append(user.id)
-            text = "добавлен"
+            text = "добавлен в список"
         else:
             users.remove(user.id)
-            text = "удален"
+            text = "удален из списка"
 
         self.db.set("AutoBan", "users", users)
-        await message.edit(f"{user.first_name} был {text} в список автобана")
+        message = await utils.answer(message, f"{user.first_name} был {text} автобана")
 
 
     async def achatcmd(self, message: Message):
@@ -63,8 +63,8 @@ class AutoBanMod(loader.Module):
 
         if args == "list":
             if not chats:
-                return await message.edit("Список пуст")
-
+                message = await utils.answer(message, "Список пуст")
+                return
             msg = ""
             for _ in chats:
                 try:
@@ -73,23 +73,23 @@ class AutoBanMod(loader.Module):
                 except:
                     chats.remove(_)
                     self.db.set("AutoBan", "users", chats)
-                    return await message.edit("Произошла ошибка. Повтори команду")
-
-            return await message.edit(f"Список чатов для автобана:\n\n{msg}")
-
+                    message = await utils.answer(message, "Произошла ошибка. Повтори команду")
+                    return
+            message = await utils.answer(message, f"Список чатов для автобана:\n\n{msg}")
+            return
         if message.is_private:
-            return await message.edit("Это не чат!")
-
+            message = await utils.answer(message, "Это не чат!")
+            return
         if chat_id not in chats:
             chats.append(chat_id)
-            text = "добавлен в"
+            text = "добавлен в список"
         else:
             chats.remove(chat_id)
-            text = "удален из"
+            text = "удален из списка"
 
         self.db.set("AutoBan", "chats", chats)
-        return await message.edit(f"Этот чат был {text} списка чатов для автобана")
-
+        message = await utils.answer(message, f"Этот чат был {text} чатов для автобана")
+        return
 
     async def watcher(self, message: Message):
         try:
@@ -112,6 +112,7 @@ class AutoBanMod(loader.Module):
                             )
                         )
                     except: pass
-                return await message.respond(f"{user.first_name} был забанен, потому что находился в списке автобана")
+                await message.respond(f"{user.first_name} был забанен, потому что находился в списке автобана")
+                return
         except:
             pass
