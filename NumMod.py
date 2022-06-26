@@ -1,4 +1,4 @@
-# meta developer: @trololo_1
+# meta developer: tg://openmessage?user_id=1707984808
 
 from .. import loader, utils
 import asyncio, pytz, re, telethon
