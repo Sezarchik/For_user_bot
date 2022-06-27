@@ -53,8 +53,7 @@ class ChatMod(loader.Module):
             else:
                 user = await message.client.get_entity(reply.sender_id)
         except ValueError:
-            if not (args or reply):
-                user = await message.client.get_entity(message.sender_id)
+            user = await message.client.get_entity(message.sender_id)
             
         message = await utils.answer(message, f"<b>Имя:</b> <code>{user.first_name}</code>\n"
                                               f"<b>ID:</b> <code>{user.id}</code>")
