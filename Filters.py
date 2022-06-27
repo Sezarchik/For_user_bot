@@ -1,3 +1,5 @@
+# meta developer: tg://openmessage?user_id=1707984808
+
 from .. import loader, utils
 
 
@@ -17,7 +19,8 @@ class FiltersMod(loader.Module):
         chatid = str(message.chat_id)
 
         if not key and not reply:
-            return await message.edit("<b>Нет аргументов и реплая.</b>")
+            message = await utils.answer(message, "<b>Нет аргументов и реплая.</b>")
+            return
 
         if chatid not in filters:
             filters.setdefault(chatid, {})
@@ -29,17 +32,19 @@ class FiltersMod(loader.Module):
             if key:
                 msgid = await self.db.store_asset(reply)
             else:
-                return await message.edit("<b>Нужны аргументы, чтобы сохранить фильтр!</b>")
+                message = await utils.answer(message, "<b>Нужны аргументы, чтобы сохранить фильтр!</b>")
+                return
         else:
             try:
                 msgid = (await message.client.send_message(f'friendly-{(await message.client.get_me()).id}-assets', key.split(' / ')[1])).id
                 key = key.split(' / ')[0]
             except IndexError:
-                return await message.edit("<b>Нужен второй аргумент (через / )или реплай.</b>")
+                message = await utils.answer(message, "<b>Нужен второй аргумент (через / )или реплай.</b>")
+                return
 
         filters[chatid].setdefault(key, msgid)
         self.db.set("Filters", "filters", filters)
-        await message.edit(f"<b>Фильтр \"{key}\" сохранён!</b>") 
+        message = await utils.answer(f"<b>Фильтр \"{key}\" сохранён!</b>") 
 
 
     async def stopcmd(self, message):
@@ -49,20 +54,24 @@ class FiltersMod(loader.Module):
         chatid = str(message.chat_id)
 
         if chatid not in filters:
-            return await message.edit("<b>В этом чате нет фильтров.</b>")
+            message = await utils.answer(message, "<b>В этом чате нет фильтров.</b>")
+            return
 
         if not args:
-            return await message.edit("<b>Нет аргументов.</b>")
+            message = await utils.answer(message, "<b>Нет аргументов.</b>")
+            return
 
         if args:
             try:
                 filters[chatid].pop(args)
                 self.db.set("Filters", "filters", filters)
-                await message.edit(f"<b>Фильтр \"{args}\" удалён из чата!</b>")
+                message = await utils.answer(message, f"<b>Фильтр \"{args}\" удалён из чата!</b>")
             except KeyError:
-                return await message.edit(f"<b>Фильтра \"{args}\" нет.</b>")
+                message = await utils.answer(message, f"<b>Фильтра \"{args}\" нет.</b>")
+                return
         else:
-            return await message.edit("<b>Нет аргументов.</b>")
+            message = await utils.answer(message, "<b>Нет аргументов.</b>")
+            return
 
 
     async def stopallcmd(self, message):
@@ -71,11 +80,12 @@ class FiltersMod(loader.Module):
         chatid = str(message.chat_id)
  
         if chatid not in filters:
-            return await message.edit("<b>В этом чате нет фильтров.</b>")
+            message = await utils.answer(message, "<b>В этом чате нет фильтров.</b>")
+            return
 
         filters.pop(chatid)
         self.db.set("Filters", "filters", filters)
-        await message.edit("<b>Всё фильтры были удалены из списка чата!</b>")
+        message = await utils.answer(message, "<b>Всё фильтры были удалены из списка чата!</b>")
 
 
     async def filterscmd(self, message):
@@ -84,12 +94,13 @@ class FiltersMod(loader.Module):
         chatid = str(message.chat_id)
 
         if chatid not in filters:
-            return await message.edit("<b>В этом чате нет фильтров.</b>")
+            message = await utils.answer(message, "<b>В этом чате нет фильтров.</b>")
+            return
 
         msg = ""
         for _ in filters[chatid]:
             msg += f"<b>• {_}</b>\n"
-        await message.edit(f"<b>Список фильтров в этом чате: {len(filters[chatid])}\n\n{msg}</b>") 
+        message = await utils.answer(message, f"<b>Список фильтров в этом чате: {len(filters[chatid])}\n\n{msg}</b>") 
 
 
     async def watcher(self, message):
