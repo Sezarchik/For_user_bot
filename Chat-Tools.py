@@ -50,9 +50,9 @@ class ChatMod(loader.Module):
         try:
             if args:
                 user = await message.client.get_entity(args if not args.isdigit() else int(args))
-            elif:
-                user = await message.client.get_entity(reply.sender_id)
             else:
+                user = await message.client.get_entity(reply.sender_id)
+            if not (args or reply):
                 user = await message.client.get_entity(message.sender_id)
 
         message = await utils.answer(message, f"<b>Имя:</b> <code>{user.first_name}</code>\n"
