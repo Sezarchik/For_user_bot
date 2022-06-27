@@ -113,7 +113,7 @@ class ChatMod(loader.Module):
                 await message.client(
                     InviteToChannelRequest(channel=message.chat_id, users=[user.id])
                 )
-                message await utils.answer(message, "<b>Пользователь приглашён успешно!</b>")
+                message = await utils.answer(message, "<b>Пользователь приглашён успешно!</b>")
 
         except ValueError:
             m = "<b>Неверный @ или ID.</b>"
