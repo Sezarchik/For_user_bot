@@ -44,7 +44,7 @@ class FiltersMod(loader.Module):
 
         filters[chatid].setdefault(key, msgid)
         self.db.set("Filters", "filters", filters)
-        message = await utils.answer(f"<b>Фильтр \"{key}\" сохранён!</b>") 
+        message = await utils.answer(message, f"<b>Фильтр \"{key}\" сохранён!</b>") 
 
 
     async def stopcmd(self, message):
