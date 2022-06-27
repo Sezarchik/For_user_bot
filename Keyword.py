@@ -106,7 +106,7 @@ class KeywordMod(loader.Module):
             kw = kw.strip()
             self.keywords[kw] = [f"{ph}", restrict, ar, l, e, c]
             self.set("keywords", self.keywords)
-            return await message.reply(                
+            return await utils.answer(message,                 
                 self.strings("kw_added").format(
                     kw,
                     utils.escape_html(ph),
@@ -119,12 +119,12 @@ class KeywordMod(loader.Module):
             )
         else:
             if kw not in self.keywords:
-                return await message.reply(self.strings("kw_404").format(kw))
+                return await utils.answer(message, self.strings("kw_404").format(kw))
 
             del self.keywords[kw]
 
             self.set("keywords", self.keywords)
-            return await message.reply(self.strings("kw_removed").format(kw))
+            return await utils.answer(message, self.strings("kw_removed").format(kw))
 
     async def kwordscmd(self, message: Message):
         """List current kwords"""
@@ -244,9 +244,9 @@ class KeywordMod(loader.Module):
                     )
 
                 if not message.reply_to_msg_id:
-                    ms = await utils.answer(message, ph[0])
+                    ms = await message.reply(ph[0])
                 else:
-                    ms = await message.respond(ph[0])
+                    ms = await message.reply(ph[0])
 
                 ms.text = ph[0][2:]
 
