@@ -69,7 +69,7 @@ class IdMod(loader.Module):
 		elif len(list_args) >= 3:
 			await message.respond('<b>Извлечения идов успешно завершены.</b>')
 			
-	async def иcmd(self, message):
+	async def idcmd(self, message):
 		"Чекает ид по реплаю."
 		reply = await message.get_reply_message()
 		json = JSON.loads(reply.to_json())
