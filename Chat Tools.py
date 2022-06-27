@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Module author: @ftgmodulesbyfl1yd, @dekftgmodules, @memeframe
+# meta developer: tg://openmessage?user_id=1707984808
 
 import asyncio
 import io
@@ -51,23 +49,21 @@ class ChatMod(loader.Module):
 
         try:
             if args:
-                user = await message.client.get_entity(
-                    args if not args.isdigit() else int(args)
-                )
+                user = await message.client.get_entity(args if not args.isdigit() else int(args))
             else:
                 user = await message.client.get_entity(reply.sender_id)
         except ValueError:
             user = await message.client.get_entity(message.sender_id)
 
-        await message.edit(
-            f"<b>Имя:</b> <code>{user.first_name}</code>\n"
-            f"<b>ID:</b> <code>{user.id}</code>"
-        )
+        message = await utils.answer(message, f"<b>Имя:</b> <code>{user.first_name}</code>\n"
+                                              f"<b>ID:</b> <code>{user.id}</code>")
+
 
     async def chatidcmd(self, message):
         """Команда .chatid показывает ID чата."""
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
         args = utils.get_args_raw(message)
         to_chat = None
 
@@ -82,21 +78,22 @@ class ChatMod(loader.Module):
 
         chat = await message.client.get_entity(to_chat)
 
-        await message.edit(
+        message = await utils.answer(message, 
             f"<b>Название:</b> <code>{chat.title}</code>\n"
-            f"<b>ID</b>: <code>{chat.id}</code>"
-        )
+            f"<b>ID</b>: <code>{chat.id}</code>")
 
     async def invitecmd(self, message):
         """Используйте .invite <@ или реплай>, чтобы добавить пользователя в чат."""
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
 
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
 
         if not args and not reply:
-            return await message.edit("<b>Нет аргументов или реплая.</b>")
+            message = await utils.answer(message, "<b>Нет аргументов или реплая.</b>")
+            return
 
         try:
             if args:
@@ -116,7 +113,7 @@ class ChatMod(loader.Module):
                 await message.client(
                     InviteToChannelRequest(channel=message.chat_id, users=[user.id])
                 )
-            return await message.edit("<b>Пользователь приглашён успешно!</b>")
+                message await utils.answer(message, "<b>Пользователь приглашён успешно!</b>")
 
         except ValueError:
             m = "<b>Неверный @ или ID.</b>"
@@ -150,18 +147,20 @@ class ChatMod(loader.Module):
         """Используйте команду .leave, чтобы кикнуть себя из чата."""
         args = utils.get_args_raw(message)
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
         if args:
-            await message.edit(f"<b>До связи.\nПричина: {args}</b>")
+            message = await utils.answer(message, f"<b>До связи.\nПричина: {args}</b>")
         else:
-            await message.edit("<b>До связи.</b>")
+            message = await utils.answer(message, "<b>До связи.</b>")
         await message.client(LeaveChannelRequest(message.chat_id))
 
     async def userscmd(self, message):
         """Команда .users <имя>; ничего выводит список всех пользователей в чате."""
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
-        await message.edit("<b>Считаем...</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
+        message = await utils.answer(message, "<b>Считаем...</b>")
         args = utils.get_args_raw(message)
         info = await message.client.get_entity(message.chat_id)
         title = info.title or "этом чате"
@@ -182,9 +181,9 @@ class ChatMod(loader.Module):
             else:
                 mentions += f'\n• <a href ="tg://user?id={user.id}">{user.first_name}</a> | <code>{user.id}</code>'
         try:
-            await message.edit(mentions)
+            message = await utils.answer(message, mentions)
         except MessageTooLongError:
-            await message.edit(
+            message = await utils.answer(message, 
                 "<b>Черт, слишком большой чат. Загружаю список пользователей в файл...</b>"
             )
             with open("userslist.md", "w+") as file:
@@ -201,8 +200,9 @@ class ChatMod(loader.Module):
     async def adminscmd(self, message):
         """Команда .admins показывает список всех админов в чате."""
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
-        await message.edit("<b>Считаем...</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
+        message = await utils.answer(message, "<b>Считаем...</b>")
         info = await message.client.get_entity(message.chat_id)
         title = info.title or "this chat"
 
@@ -228,9 +228,9 @@ class ChatMod(loader.Module):
             else:
                 mentions += f'\n• <a href="tg://user?id={user.id}">{user.first_name}</a> | {rank} | <code>{user.id}</code>'
         try:
-            await message.edit(mentions)
+            message = await utils.answer(message, mentions)
         except MessageTooLongError:
-            await message.edit(
+            message = await utils.answer(message, 
                 "Черт, слишком много админов здесь. Загружаю список админов в файл..."
             )
             with open("adminlist.md", "w+") as file:
@@ -247,8 +247,9 @@ class ChatMod(loader.Module):
     async def botscmd(self, message):
         """Команда .bots показывает список всех ботов в чате."""
         if message.is_private:
-            return await message.edit("<b>Это не чат!</b>")
-        await message.edit("<b>Считаем...</b>")
+            message = await utils.answer(message, "<b>Это не чат!</b>")
+            return
+        message = await utils.answer(message, "<b>Считаем...</b>")
 
         info = await message.client.get_entity(message.chat_id)
         title = info.title or "this chat"
@@ -265,9 +266,9 @@ class ChatMod(loader.Module):
                 mentions += f"\n• Удалённый бот <b>|</b> <code>{user.id}</code> "
 
         try:
-            await message.edit(mentions, parse_mode="html")
+            message = await utils.answer(message, mentions, parse_mode="html")
         except MessageTooLongError:
-            await message.edit(
+            message = await utils.answer(message, 
                 "Черт, слишком много ботов здесь. Загружаю " "список ботов в файл..."
             )
             with open("botlist.md", "w+") as file:
@@ -287,8 +288,9 @@ class ChatMod(loader.Module):
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not args and not reply:
-            return await message.edit("<b>Нет аргументов или реплая.</b>")
-        await message.edit("<b>Считаем...</b>")
+            message = await utils.answer(message, "<b>Нет аргументов или реплая.</b>")
+            return
+        message = await utils.answer(message, "<b>Считаем...</b>")
         try:
             if args:
                 if args.isnumeric():
@@ -299,7 +301,8 @@ class ChatMod(loader.Module):
             else:
                 user = await utils.get_user(reply)
         except ValueError:
-            return await message.edit("<b>Не удалось найти пользователя.</b>")
+            message = await utils.answer(message, "<b>Не удалось найти пользователя.</b>")
+            return
         msg = f"<b>Общие чаты с {user.first_name}:</b>\n"
         user = await message.client(GetFullUserRequest(user.id))
         comm = await message.client(
@@ -311,7 +314,7 @@ class ChatMod(loader.Module):
             m += f'\n• <a href="tg://resolve?domain={chat.username}">{chat.title}</a> <b>|</b> <code>{chat.id}</code> '
             count += 1
         msg = f"<b>Общие чаты с {user.user.first_name}: {count}</b>\n"
-        await message.edit(f"{msg} {m}")
+        message = await utils.answer(message, f"{msg} {m}")
 
     async def chatdumpcmd(self, message):
         """.chatdump <n> <m> <s>
@@ -321,7 +324,7 @@ class ChatMod(loader.Module):
         <s> - Тихий дамп
         """
         if not message.chat:
-            await message.edit("<b>Это не чат</b>")
+            message = await utils.answer(message, "<b>Это не чат</b>")
             return
         chat = message.chat
         num = False
@@ -336,7 +339,7 @@ class ChatMod(loader.Module):
             if "m" in a:
                 tome = True
         if not silent:
-            await message.edit("🖤Дампим чат...🖤")
+            message = await utils.answer(message, "🖤Дампим чат...🖤")
         else:
             await message.delete()
         f = io.BytesIO()
@@ -362,9 +365,9 @@ class ChatMod(loader.Module):
         if not silent:
             if tome:
                 if num:
-                    await message.edit("🖤Дамп юзеров чата сохранён в " "избранных!🖤")
+                    message = await utils.answer(message, "🖤Дамп юзеров чата сохранён в " "избранных!🖤")
                 else:
-                    await message.edit(
+                    message = await utils.answer(message, 
                         "🖤Дамп юзеров чата с открытыми "
                         "номерами сохранён в избранных!🖤"
                     )
@@ -379,7 +382,7 @@ class ChatMod(loader.Module):
             user = [
                 i async for i in event.client.iter_participants(event.to_id.channel_id)
             ]
-            await event.edit(
+            message = await utils.answer(message, 
                 f"<b>{len(user)} пользователей будет приглашено из чата {event.to_id.channel_id} в чат/канал {idschannelgroup}</b>"
             )
             for u in user:
@@ -397,7 +400,7 @@ class ChatMod(loader.Module):
                 except errors.FloodWaitError as e:
                     print("Flood for", e.seconds)
         else:
-            await event.edit("<b>Куда приглашать будем?</b>")
+            message = await utils.answer(message, "<b>Куда приглашать будем?</b>")
 
     async def reportcmd(self, message):
         """Репорт пользователя за спам."""
@@ -410,10 +413,11 @@ class ChatMod(loader.Module):
         if reply:
             user = await message.client.get_entity(reply.sender_id)
         else:
-            return await message.edit("<b>Кого я должен зарепортить?</b>")
+            message = await utils.answer(message, "<b>Кого я должен зарепортить?</b>")
+            return
 
         await message.client(functions.messages.ReportSpamRequest(peer=user.id))
-        await message.edit("<b>Ты получил репорт за спам!</b>")
+        message = await utils.answer(message, "<b>Ты получил репорт за спам!</b>")
         await sleep(1)
         await message.delete()
 
@@ -425,11 +429,13 @@ class ChatMod(loader.Module):
         if chatid not in echos:
             echos.append(chatid)
             self.db.set("Echo", "chats", echos)
-            return await message.edit("<b>[Echo Mode]</b> Активирован в этом чате!")
+            message = await utils.answer(message, "<b>[Echo Mode]</b> Активирован в этом чате!")
+            return
 
         echos.remove(chatid)
         self.db.set("Echo", "chats", echos)
-        return await message.edit("<b>[Echo Mode]</b> Деактивирован в этом чате!")
+        message = await utils.answer(message, "<b>[Echo Mode]</b> Деактивирован в этом чате!")
+        return
 
     async def watcher(self, message):
         echos = self.db.get("Echo", "chats", [])
