@@ -1,5 +1,4 @@
-# for more info: https://murix.ru/files/ftg
-# by xadjilut, 2021
+# meta developer: tg://openmessage?user_id=1707984808
 
 import random
 from .. import loader, utils
