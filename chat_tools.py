@@ -141,7 +141,8 @@ class ChatMod(loader.Module):
             m = "<b>Пользователь уже в группе.</b>"
         except YouBlockedUserError:
             m = "<b>Вы заблокировали этого пользователя.</b>"
-        return await message.reply(m)
+        await message.reply(m)
+        return
 
     async def leavecmd(self, message):
         """Используйте команду .leave, чтобы кикнуть себя из чата."""
