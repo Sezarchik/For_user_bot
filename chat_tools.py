@@ -141,6 +141,8 @@ class ChatMod(loader.Module):
             m = "<b>Пользователь уже в группе.</b>"
         except YouBlockedUserError:
             m = "<b>Вы заблокировали этого пользователя.</b>"
+        except UnboundLocalError:
+            m = "✅ <b>Да, треш.</b>"
         await message.reply(m)
         return
 
